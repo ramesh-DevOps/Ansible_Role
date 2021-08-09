@@ -1,17 +1,5 @@
 ---
 # tasks file for Role1
-- name: Get SSM Param Value
-  command: >
-    aws ssm get-parameters
-      --names "/app/{{ app_name }}/secret"
-      --query 'Parameters[0].Value'
-      --with-decryption
-      --output text
-      --region "{{ region }}"
-  register: secret_value
-  no_log: false
-- set_fact:
-    secret_value: "{{ secret_value.stdout }}"
 - name: Generate and store New Password
   block:
  
