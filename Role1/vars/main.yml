@@ -1,0 +1,5 @@
+---
+# vars file for Role1
+app_name: password
+region: us-west-2
+replace: false

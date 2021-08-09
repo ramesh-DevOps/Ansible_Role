@@ -1,0 +1,40 @@
+---
+# tasks file for Role1
+- name: Get SSM Param Value
+  command: >
+    aws ssm get-parameters
+      --names "/app/{{ app_name }}/secret"
+      --query 'Parameters[0].Value'
+      --with-decryption
+      --output text
+      --region "{{ region }}"
+  register: secret_value
+  no_log: false
+- set_fact:
+    secret_value: "{{ secret_value.stdout }}"
+- name: Generate and store New Password
+  block:
+ 
+    - set_fact:
+        pw1: "{{ lookup('password', '/dev/null chars=ascii_lowercase length=3') }}"
+        pw2: "{{ lookup('password', '/dev/null chars=ascii_uppercase length=3') }}"
+        pw3: "{{ lookup('password', '/dev/null chars=digits          length=3') }}"
+        pw4: "{{ lookup('password', '/dev/null chars=_,!,%,*,(,),-,+ length=3') }}"
+ 
+    - set_fact:
+        random_password: "{{ (pw1+pw2+pw3+pw4)|shuffle|join('') }}"
+ 
+    - name: Set SSM Param Value
+      command: >
+        aws ssm put-parameter
+          --name "Parameter1"
+          --value "{{ random_password }}"
+          --type "SecureString"
+          --key-id "alias/aws/ssm"
+          --overwrite
+          --region "{{ region }}"
+ 
+    - set_fact:
+        secret_value: "{{  random_password }}"
+ 
+  when: secret_value == 'None' or replace == 'true'
