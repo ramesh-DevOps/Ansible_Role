@@ -3,7 +3,7 @@
 - name: Get SSM Param Value
   command: >
     aws ssm get-parameters
-      --names "Parameter1"
+      --names "/app/{{ app_name }}/secret"
       --query 'Parameters[0].Value'
       --with-decryption
       --output text
